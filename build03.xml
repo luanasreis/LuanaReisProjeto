@@ -1,0 +1,97 @@
+<project name="LuanaReisProjeto" default="main" basedir=".">
+
+	<description>
+A sample build file for this project
+</description>
+
+	<!-- global properties for this build file -->
+	<property name="source.dir" location="src" />
+	<property name="build.dir" location="bin" />
+	<property name="doc.dir" location="doc" />
+	<property name="jar.dir" location="jar" />
+	<property name="build.test.dir" location="bin/tests" />
+	<!-- Variable used for JUnit testin -->
+	<property name="test.report.dir" location="testreport" />
+
+	<path id="junit.class.path">
+		<pathelement location="junit-4.13-beta-3.jar" />
+		<pathelement location="hamcrest-core-1.3.jar" />
+		<pathelement location="${build.dir}" />
+	</path>
+
+	<!-- set up some directories used by this project -->
+	<target name="init" description="setup project directories">
+		<mkdir dir="${build.dir}" />
+		<mkdir dir="${doc.dir}" />
+		<mkdir dir="${jar.dir}" />
+		<mkdir dir="${build.test.dir}" />
+		<mkdir dir="${test.report.dir}" />
+	</target>
+
+	<!-- Compile the java code in src dir into build dir -->
+	<target name="compile" description="compile java sources">
+		<javac srcdir="${source.dir}" destdir="${build.dir}" includeantruntime="false">
+			<classpath refid="junit.class.path" />
+		</javac>
+	</target>
+
+	<!-- Generate javadocs for current project into docs dir -->
+	<target name="doc" description="generate documentation">
+		<javadoc sourcepath="${source.dir}" destdir="${doc.dir}">
+			<classpath refid="junit.class.path" />
+		</javadoc>
+	</target>
+	
+	<!-- Delete the build & doc directories and Emacs backup (*~) files -->
+	<target name="clean" description="tidy up the workspace">
+		<delete dir="${build.dir}" />
+		<delete dir="${doc.dir}" />
+		<delete dir="${jar.dir}" />
+		
+		<delete dir="${emma.report.dir}" />
+		<delete dir="${emma.bin.dir}" />
+		<delete dir="${emma.metadate.dir}" />
+		
+		<delete>
+			<fileset defaultexcludes="no" dir="${source.dir}" includes="*/~" />
+		</delete>
+	</target>
+
+	<target name="package" description="Gerar arquivo .jar">
+		<jar basedir="${build.dir}" destfile="${jar.dir}/aplicacao.jar" />
+	</target>
+	
+	<target name="test">
+		<junit haltonfailure="false" haltonerror="false" fork="true">
+			<classpath refid="junit.class.path" />
+			<formatter type="plain" usefile="false" />
+			<batchtest>
+				<fileset dir="${source.dir}">
+				 	<include name="Testvalores" />
+				</fileset>
+			</batchtest>
+		</junit>
+    </target>
+	
+	<!-- Run the JUnit Tests -->
+		<!-- Output is XML, could also be plain-->
+		<target name="junit">
+			<junit printsummary="on" fork="true" haltonfailure="yes">
+				<classpath refid="junit.class.path" />
+				<classpath>
+				    <pathelement location="${build.test.dir}"/>
+				  </classpath>
+				<formatter type="xml" />
+				<batchtest todir="${test.report.dir}">
+					<fileset dir="${source.dir}">
+						<include name="**/*Test*.java" />
+					</fileset>
+				</batchtest>
+			</junit>
+		</target>
+
+
+	<target name="main" depends="clean, init, compile, doc, package,junit">
+		<description>Main target</description>
+	</target>
+</project>
